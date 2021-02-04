@@ -28,7 +28,7 @@ def write_msg(user_id, message):
         message=message
     )
 
-# основной код тут, sqlite3 почему-то ничего не сохраняют
+# основной код тут
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
         request = event.text
@@ -40,20 +40,29 @@ for event in longpoll.listen():
         if result != str(event.user_id):
             cur.execute(f'''INSERT INTO users(user_id, group_id) VALUES({event.user_id}, 'new_user') ''')
             write_msg(event.user_id, 'Хотите создать новый класс или присоединиться к другому?')
+            con.commit()
 
         elif request in initial_words:
             write_msg(event.user_id, command)
 
         elif 'создать новый класс' in request:
-            group_id, password = request.replace('создать новый класс ', '').split(', ')
+            write_msg(event.user_id, 'в процессе')
+            a = request.replace('создать новый класс ', '').split(', ')
+            print(a)
+            group_id, password = a
             print(group_id)
             print(password)
-            result = str(cur.execute(f'''SELECT 1 FROM groups
+            result = str(cur.execute(f'''SELECT group_id FROM groups
                 WHERE group_id = '{group_id}' ''').fetchall())[2:-3]
-            print(result, '111111111')
-            if result != '1':
+            print(result, '1')
+            if result == '':
                 cur.execute(f'''INSERT INTO groups(group_id, password) VALUES('{group_id}', '{password}') ''')
                 cur.execute(f'''UPDATE users SET group_id = '{group_id}' WHERE user_id = '{event.user_id}' ''')
+                con.commit()
+                result = str(cur.execute(f'''SELECT user_id, group_id FROM users
+                    WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+                print(result)
+
 
 
 

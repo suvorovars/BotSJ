@@ -45,7 +45,7 @@ for event in longpoll.listen():
             write_msg(event.user_id, command)
             con.commit()
 
-        elif request in initial_words:
+        if request in initial_words:
             write_msg(event.user_id, command)
 
         elif 'создать новый класс' in request:

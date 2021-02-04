@@ -53,16 +53,32 @@ for event in longpoll.listen():
             print(group_id)
             print(password)
             result = str(cur.execute(f'''SELECT group_id FROM groups
-                WHERE group_id = '{group_id}' ''').fetchall())[2:-3]
+                WHERE group_id = '{group_id}' ''').fetchall())[2:-2]
             print(result, '1')
             if result == '':
                 cur.execute(f'''INSERT INTO groups(group_id, password) VALUES('{group_id}', '{password}') ''')
                 cur.execute(f'''UPDATE users SET group_id = '{group_id}' WHERE user_id = '{event.user_id}' ''')
+                cur.execute(f'''CREATE TABLE {group_id} (
+    ID      INT
+    call    STRING,
+    monday  STRING,
+    tuesday STRING,
+    wednesday STRING,
+    thursday STRING
+    friday STRING); ''')
                 con.commit()
                 result = str(cur.execute(f'''SELECT user_id, group_id FROM users
                     WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 print(result)
 
+        # пока не работает
+        if 'новые звонки:' in request:
+            a = request.replace('новые звонки: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                            WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            cur.execute(f'''UPDATE {result} SET ID = 0, call = '' WHERE ''')
+            for i in range(len(a)):
+                cur.execute(f'''INSERT INTO {result}(ID, call) VALUES({i + 1}, '{a[i]}')''')
 
 
 

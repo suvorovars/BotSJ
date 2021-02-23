@@ -3,6 +3,7 @@ import sqlite3
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
+from sql_requests import *
 
 vk_session = vk_api.VkApi(token="da3c917417e008d6f650f050a8b00c6ab0c4f84b3ff3f6a921890fe83445943508625a6e57c97b4f7c7cb")
 
@@ -35,48 +36,25 @@ for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
         request = event.text
         request = request.strip().lower()
-        print(event.user_id)
-        result = str(cur.execute(f'''SELECT user_id FROM users
-    WHERE user_id = '{event.user_id}' ''').fetchall())[2:-3]
-        print(result)
-        if result != str(event.user_id):
-            cur.execute(f'''INSERT INTO users(user_id, group_id) VALUES({event.user_id}, 'new_user') ''')
+        result = user_presence(event.user_id)
+        if not result:
+            user_add(event.user_id)
             write_msg(event.user_id, 'Хотите создать новый класс или присоединиться к другому?')
-            write_msg(event.user_id, command)
-            con.commit()
 
         if request in initial_words:
             write_msg(event.user_id, command)
 
-        elif 'создать новый класс' in request:
+        elif 'новый класс' in request:
             write_msg(event.user_id, 'в процессе')
-            a = request.replace('создать новый класс ', '').split(', ')
-            print(a)
+            a = request.replace('новый класс ', '').split(', ')
             group_id, password = a
             print(group_id)
             print(password)
-            result = str(cur.execute(f'''SELECT group_id FROM groups
-                WHERE group_id = '{group_id}' ''').fetchall())[2:-3]
-            print(result, '1')
-            if result == '':
-                cur.execute(f'''INSERT INTO groups(group_id, password) VALUES('{group_id}', '{password}') ''')
-                con.commit()
-                cur.execute(f'''UPDATE users SET group_id = '{group_id}' WHERE user_id = '{event.user_id}' ''')
-                con.commit()
-                cur.execute(f'''CREATE TABLE {group_id} (
-    ID      INT,
-    call    STRING,
-    monday  STRING,
-    tuesday STRING,
-    wednesday STRING,
-    thursday STRING,
-    friday STRING); ''')
-                con.commit()
-                result = str(cur.execute(f'''SELECT user_id, group_id FROM users
-                    WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
-                print(result)
-                write_msg(event.user_id, 'Ваш новый класс создан')
-                print(result)
+            a = new_class(event.user_id, group_id, password)
+            if a:
+                write_msg(event.user_id, f'новый класс {group_id} с паролем {password} создан')
+            else:
+                write_msg(event.user_id, f'класс с названием {group_id} уже создан или некорректно назван')
 
         # пока не работает
         elif 'новые звонки:' in request:
@@ -100,6 +78,7 @@ for event in longpoll.listen():
                     mess = mess + str(i)[2:-3] + '\n'
                 write_msg(event.user_id, mess)
                 mess = ''
+
 
         elif 'добавиться в класс ' in request:
             write_msg(event.user_id, 'в процессе')

@@ -23,22 +23,24 @@ def new_class(user_id, group_id, password):
             thursday STRING,
             friday STRING); ''')
             con.commit()
+            for i in range(1, 11):
+                cur.execute(f'''INSERT INTO {group_id}(ID) VALUES({i})''')
+            con.commit()
             return True
+
         return False
     except:
         return False
 
 
-def new_call(user_id, mess):
+def update_journal(user_id, mess, val_update):
     group_id = str(cur.execute(f'''SELECT group_id FROM users
                         WHERE user_id = '{user_id}' ''').fetchall())[2:-3]
     result = str(cur.execute(f'''SELECT ID FROM {group_id}' ''').fetchall())[2:-3]
     if result == '':
-        x = 1
-        for i in mess:
-            cur.execute(f'''INSERT INTO {group_id}(ID, call) VALUES({x}, {i}) ''')
-            con.commit()
-            x += 1
+        for i in range(len(mess)):
+            cur.execute(f'''UPDATE {group_id} SET {val_update} = {mess[i]} WHERE ID = {i + 1}''')
+        con.commit()
 
 
 def user_presence(user_id):

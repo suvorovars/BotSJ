@@ -4,7 +4,7 @@ con = sqlite3.connect("BotSJ.db")
 cur = con.cursor()
 
 
-def new_class(user_id, group_id, password):
+def new_class(user_id, group_id, password, sixday=False):
     try:
         result = str(cur.execute(f'''SELECT group_id FROM groups
                         WHERE group_id = '{group_id}' ''').fetchall())[2:-3]
@@ -14,14 +14,25 @@ def new_class(user_id, group_id, password):
             con.commit()
             cur.execute(f'''UPDATE users SET group_id = '{group_id}' WHERE user_id = '{user_id}' ''')
             con.commit()
-            cur.execute(f'''CREATE TABLE {group_id} (
-            ID      INT,
-            call    STRING,
-            monday  STRING,
-            tuesday STRING,
-            wednesday STRING,
-            thursday STRING,
-            friday STRING); ''')
+            if sixday:
+                cur.execute(f'''CREATE TABLE {group_id} (
+                ID      INT,
+                call    STRING,
+                monday  STRING,
+                tuesday STRING,
+                wednesday STRING,
+                thursday STRING,
+                friday STRING,
+                saturday STRING); ''')
+            else:
+                cur.execute(f'''CREATE TABLE {group_id} (
+                ID      INT,
+                call    STRING,
+                monday  STRING,
+                tuesday STRING,
+                wednesday STRING,
+                thursday STRING,
+                friday STRING); ''')
             con.commit()
             for i in range(1, 11):
                 cur.execute(f'''INSERT INTO {group_id}(ID) VALUES({i})''')
@@ -60,3 +71,4 @@ def user_add(user_id):
 
 def get_group_id(user_id):
     return str(cur.execute(f'''SELECT group_id FROM users WHERE user_id = '{user_id}' ''').fetchall())[2:-3]
+

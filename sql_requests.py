@@ -34,19 +34,21 @@ def new_class(user_id, group_id, password):
 
 
 def update_journal(user_id, mess, val_update):
-    group_id = str(cur.execute(f'''SELECT group_id FROM users
-                        WHERE user_id = '{user_id}' ''').fetchall())[2:-3]
-    result = str(cur.execute(f'''SELECT ID FROM {group_id}' ''').fetchall())[2:-3]
-    if result == '':
+    group_id = get_group_id(user_id)
+    print(group_id)
+    result = str(cur.execute(f'''SELECT ID FROM {group_id} ''').fetchall())[2:-3]
+    print(result)
+    if result != '':
         for i in range(len(mess)):
-            cur.execute(f'''UPDATE {group_id} SET {val_update} = {mess[i]} WHERE ID = {i + 1}''')
+            print(mess[i])
+            cur.execute(f'''UPDATE {group_id} SET {val_update} = '{mess[i]}' WHERE ID = {i + 1}''')
         con.commit()
 
 
 def user_presence(user_id):
-    result = str(cur.execute(f'''SELECT user_id FROM users
+    result = str(cur.execute(f'''SELECT 1 FROM users
         WHERE user_id = '{user_id}' ''').fetchall())[2:-3]
-    if result != user_id:
+    if result == '1':
         return False
     return True
 
@@ -54,3 +56,7 @@ def user_presence(user_id):
 def user_add(user_id):
     cur.execute(f'''INSERT INTO users(user_id, group_id) VALUES({user_id}, 'new_user') ''')
     con.commit()
+
+
+def get_group_id(user_id):
+    return str(cur.execute(f'''SELECT group_id FROM users WHERE user_id = '{user_id}' ''').fetchall())[2:-3]

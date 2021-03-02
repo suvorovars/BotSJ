@@ -16,7 +16,8 @@ cur = con.cursor()
 initial_words = ['привет', 'приветик', 'начать', "помощь", "старт", "команды", "да"] # потом дозаполню стартовый список
 # список команд
 command = '''
-Добавиться в класс "Класс", "Пароль"
+Добавиться "Класс", "Пароль"
+Новый класс "Класс", "Пароль"
 Рассписание 
 '''
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
@@ -32,12 +33,11 @@ def write_msg(user_id, message):
 # основной код тут
 
 for event in longpoll.listen():
-
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+        print(event.user_id)
         request = event.text
         request = request.strip().lower()
-        result = user_presence(event.user_id)
-        if not result:
+        if user_presence(event.user_id):
             user_add(event.user_id)
             write_msg(event.user_id, 'Хотите создать новый класс или присоединиться к другому?')
 
@@ -57,19 +57,46 @@ for event in longpoll.listen():
                 write_msg(event.user_id, f'класс с названием {group_id} уже создан или некорректно назван')
 
         # пока не работает
-        elif 'новые звонки:' in request:
-            a = request.replace('новые звонки: ', '').split(', ')
+        elif 'изменить звонки:' in request:
+            a = request.replace('изменить звонки: ', '').split(', ')
             result = str(cur.execute(f'''SELECT group_id FROM users
                             WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
-            cur.execute(f'''UPDATE {result} 
-    SET ID = 0, call = '' 
-    WHERE ID != '' ''')
-            for i in range(len(a)):
-                cur.execute(f'''INSERT INTO {result}(ID, call) VALUES({i + 1}, '{a[i]}')''')
+            update_journal(event.user_id, a, 'call')
+
+        elif 'изменить понедельник:' in request:
+            a = request.replace('изменить понедельник: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                            WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'monday')
+
+        elif 'изменить вторник:' in request:
+            a = request.replace('изменить вторник: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                            WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'tuesday')
+        elif 'изменить среду:' in request:
+            a = request.replace('изменить среду: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                                   WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'wednesday')
+
+        elif 'изменить четверг:' in request:
+            a = request.replace('изменить четверг: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                                   WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'thursday')
+
+        elif 'изменить пятницу:' in request:
+            a = request.replace('изменить вторник: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                                   WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'friday')
+
+
 
         elif request == 'расписание':
             mess = ''
-            group_id = str(cur.execute(f'''SELECT group_id FROM users WHERE user_id = '{event.user_id}' ''').fetchall())[2:-3]
+            group_id = get_group_id(event.user_id)
             print(group_id)
             for i in days:
                 rasp = cur.execute(f'''SELECT {i} FROM {group_id} ''').fetchall()
@@ -80,9 +107,9 @@ for event in longpoll.listen():
                 mess = ''
 
 
-        elif 'добавиться в класс ' in request:
+        elif 'добавиться ' in request:
             write_msg(event.user_id, 'в процессе')
-            a = request.replace('добавиться в класс ', '').split(', ')
+            a = request.replace('добавиться ', '').split(', ')
             group_id, password = a
             result = str(cur.execute(f"SELECT 1 FROM groups WHERE group_id = '{group_id}' AND password = '{password}' ").fetchall())[2:-3]
             print(result)

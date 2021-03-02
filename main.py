@@ -44,7 +44,7 @@ for event in longpoll.listen():
         if request in initial_words:
             write_msg(event.user_id, command)
 
-        elif 'новый класс' in request:
+        elif 'новый класс 5' in request:
             write_msg(event.user_id, 'в процессе')
             a = request.replace('новый класс ', '').split(', ')
             group_id, password = a
@@ -56,7 +56,18 @@ for event in longpoll.listen():
             else:
                 write_msg(event.user_id, f'класс с названием {group_id} уже создан или некорректно назван')
 
-        # пока не работает
+        elif 'новый класс 6' in request:
+            write_msg(event.user_id, 'в процессе')
+            a = request.replace('новый класс ', '').split(', ')
+            group_id, password = a
+            print(group_id)
+            print(password)
+            a = new_class(event.user_id, group_id, password, sixday=True)
+            if a:
+                write_msg(event.user_id, f'новый класс {group_id} с паролем {password} создан')
+            else:
+                write_msg(event.user_id, f'класс с названием {group_id} уже создан или некорректно назван')
+
         elif 'изменить звонки:' in request:
             a = request.replace('изменить звонки: ', '').split(', ')
             result = str(cur.execute(f'''SELECT group_id FROM users

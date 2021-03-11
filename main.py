@@ -17,7 +17,7 @@ initial_words = ['привет', 'приветик', 'начать', "помощ
 # список команд
 command = '''
 Добавиться "Класс", "Пароль"
-Новый класс "Класс", "Пароль"
+Новый класс [6] "Класс", "Пароль"
 Рассписание 
 '''
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
@@ -44,7 +44,7 @@ for event in longpoll.listen():
         if request in initial_words:
             write_msg(event.user_id, command)
 
-        elif 'новый класс 5' in request:
+        elif 'новый класс ' in request:
             write_msg(event.user_id, 'в процессе')
             a = request.replace('новый класс ', '').split(', ')
             group_id, password = a
@@ -58,7 +58,7 @@ for event in longpoll.listen():
 
         elif 'новый класс 6' in request:
             write_msg(event.user_id, 'в процессе')
-            a = request.replace('новый класс ', '').split(', ')
+            a = request.replace('новый класс 6', '').split(', ')
             group_id, password = a
             print(group_id)
             print(password)
@@ -111,10 +111,14 @@ for event in longpoll.listen():
             print(group_id)
             for i in days:
                 rasp = cur.execute(f'''SELECT {i} FROM {group_id} ''').fetchall()
-                for i in rasp:
-                    print(i)
-                    mess = mess + str(i)[2:-3] + '\n'
-                write_msg(event.user_id, mess)
+                for j in rasp:
+                    print(j)
+                    if str(j)[2:-3] != 'on':
+                        mess = mess + str(j)[2:-3] + '\n'
+                if mess == '':
+                    write_msg(event.user_id, f'Не найдено рассписания на {i}, возможно вы его не записали или удалили')
+                else:
+                    write_msg(event.user_id, mess)
                 mess = ''
 
 

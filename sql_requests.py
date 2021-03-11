@@ -15,6 +15,7 @@ def new_class(user_id, group_id, password, sixday=False):
             cur.execute(f'''UPDATE users SET group_id = '{group_id}' WHERE user_id = '{user_id}' ''')
             con.commit()
             if sixday:
+                print('qwerty')
                 cur.execute(f'''CREATE TABLE {group_id} (
                 ID      INT,
                 call    STRING,
@@ -24,7 +25,9 @@ def new_class(user_id, group_id, password, sixday=False):
                 thursday STRING,
                 friday STRING,
                 saturday STRING); ''')
+                print('qwerty')
             else:
+                print('qwerty')
                 cur.execute(f'''CREATE TABLE {group_id} (
                 ID      INT,
                 call    STRING,
@@ -33,6 +36,8 @@ def new_class(user_id, group_id, password, sixday=False):
                 wednesday STRING,
                 thursday STRING,
                 friday STRING); ''')
+                print('qwerty')
+            print('qwerty')
             con.commit()
             for i in range(1, 11):
                 cur.execute(f'''INSERT INTO {group_id}(ID) VALUES({i})''')

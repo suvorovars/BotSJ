@@ -99,7 +99,7 @@ for event in longpoll.listen():
             update_journal(event.user_id, a, 'thursday')
 
         elif 'изменить пятницу:' in request:
-            a = request.replace('изменить вторник: ', '').split(', ')
+            a = request.replace('изменить пятницу: ', '').split(', ')
             result = str(cur.execute(f'''SELECT group_id FROM users
                                    WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
             update_journal(event.user_id, a, 'friday')

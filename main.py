@@ -104,6 +104,16 @@ for event in longpoll.listen():
                                    WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
             update_journal(event.user_id, a, 'friday')
 
+        elif 'изменить субботу:' in request:
+            b = f"""SELECT * FROM sqlite_master WHERE type = 'table' AND name = '{group_id}' AND sql LIKE '%saturday%'"""
+            if b == '':
+                write_msg(event.user_id, f'Ваше расписание работает по пятидневной системе обучения')
+                continue
+            a = request.replace('изменить субботу: ', '').split(', ')
+            result = str(cur.execute(f'''SELECT group_id FROM users
+                                   WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
+            update_journal(event.user_id, a, 'saturday')
+
         elif request == 'расписание понедельник':
             mess = ''
             group_id = get_group_id(event.user_id)

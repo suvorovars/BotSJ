@@ -3,6 +3,8 @@ import sqlite3
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
+
+from reminders_req import write_reminder
 from sql_requests import *
 
 vk_session = vk_api.VkApi(token="da3c917417e008d6f650f050a8b00c6ab0c4f84b3ff3f6a921890fe83445943508625a6e57c97b4f7c7cb")
@@ -19,6 +21,7 @@ command = '''
 Добавиться "Класс", "Пароль"
 Новый класс [6] "Класс", "Пароль"
 Рассписание 
+Напомнить 'дд.мм.гг', 'чч:мм', 'текст напоминания'
 '''
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 days_ru = ['понедельник', 'вторник', 'среда', 'четверг', '', '']
@@ -105,7 +108,8 @@ for event in longpoll.listen():
             update_journal(event.user_id, a, 'friday')
 
         elif 'изменить субботу:' in request:
-            b = f"""SELECT * FROM sqlite_master WHERE type = 'table' AND name = '{group_id}' AND sql LIKE '%saturday%'"""
+            b = str(cur.execute(f"""SELECT * FROM sqlite_master 
+                    WHERE type = 'table' AND name = '{group_id}' AND sql LIKE '%saturday%'""").fetchall())[2:-3]
             if b == '':
                 write_msg(event.user_id, f'Ваше расписание работает по пятидневной системе обучения')
                 continue
@@ -230,6 +234,16 @@ for event in longpoll.listen():
                 cur.execute(f"UPDATE users SET group_id = '{group_id}' WHERE user_id = '{event.user_id}' ")
                 con.commit()
                 write_msg(event.user_id, f'Вы присоединены к классу {group_id}')
+
+        elif 'напомнить' in request:
+            a = request.replace('напомнить')
+            b = a.split(', ')
+            try:
+                a = write_reminder(b[0], b[1], [2], event.user_id)
+
+            except:
+                write_msg(event.user_id, 'Упс, что-то пошло не так')
+
 
         else:
             write_msg(event.user_id, 'Бот еще пока на стадии разработки, но вы можете отправить своё мнение в гугл форму: https://docs.google.com/forms/d/e/1FAIpQLSdmE-1tzm7v40qQW0RKq4bLMjHWE2TuwGpAypjxfZ5lf4csGw/viewform?usp=sf_link')

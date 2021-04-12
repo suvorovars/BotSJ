@@ -19,9 +19,10 @@ initial_words = ['привет', 'приветик', 'начать', "помощ
 command = '''
 Добавиться "Класс", "Пароль"
 Новый класс [6] "Класс", "Пароль"
-Рассписание 
-Рассписание "день недели"
-Изменить "день недели"
+Расписание 
+Расписание "день недели"
+Изменить "день недели": "1 урок"
+"2 урок" и т.д.
 '''
 days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 days_ru = ['понедельник', 'вторник', 'среда', 'четверг', '', '']
@@ -74,39 +75,45 @@ for event in longpoll.listen():
                     write_msg(event.user_id, f'класс с названием {group_id} уже создан или некорректно назван')
 
             elif 'изменить звонки:' in request:
-                a = request.replace('изменить звонки: ', '').split(', ')
+                a = request.replace('изменить звонки: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                 WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'call')
 
             elif 'изменить понедельник:' in request:
-                a = request.replace('изменить понедельник: ', '').split(', ')
+                a = request.replace('изменить понедельник: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                 WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'monday')
+                write_msg(event.user_id, 'изменения прошли успешно')
 
             elif 'изменить вторник:' in request:
-                a = request.replace('изменить вторник: ', '').split(', ')
+                a = request.replace('изменить вторник: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                 WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'tuesday')
+                write_msg(event.user_id, 'изменения прошли успешно')
+
             elif 'изменить среду:' in request:
-                a = request.replace('изменить среду: ', '').split(', ')
+                a = request.replace('изменить среду: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                        WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'wednesday')
+                write_msg(event.user_id, 'изменения прошли успешно')
 
             elif 'изменить четверг:' in request:
-                a = request.replace('изменить четверг: ', '').split(', ')
+                a = request.replace('изменить четверг: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                        WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'thursday')
+                write_msg(event.user_id, 'изменения прошли успешно')
 
             elif 'изменить пятницу:' in request:
-                a = request.replace('изменить вторник: ', '').split(', ')
+                a = request.replace('изменить вторник: ', '').split('\n')
                 result = str(cur.execute(f'''SELECT group_id FROM users
                                        WHERE user_id = '{event.user_id}' ''').fetchall())[2:-2]
                 update_journal(event.user_id, a, 'friday')
+                write_msg(event.user_id, 'изменения прошли успешно')
 
             elif request == 'расписание понедельник':
                 mess = ''
@@ -229,4 +236,5 @@ for event in longpoll.listen():
                 write_msg(event.user_id, 'Бот еще пока на стадии разработки, но вы можете отправить своё мнение в гугл форму: https://docs.google.com/forms/d/e/1FAIpQLSdmE-1tzm7v40qQW0RKq4bLMjHWE2TuwGpAypjxfZ5lf4csGw/viewform?usp=sf_link')
         except:
             print(traceback.format_exc())
+            # write_msg(event.user_id, 'Упс... что-то пошло не так, попробуйте еще раз')
 
